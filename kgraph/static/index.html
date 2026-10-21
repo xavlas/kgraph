@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kgraph · Knowledge Graph Explorer</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-repo" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-ask" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-query" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-rules" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h8M18 6h2M4 12h2M12 12h8M4 18h10M20 18h0"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M7.8 8.6 10.9 16M16.4 8 13.3 16M8.4 6.8l7.2-.6"/></symbol>
+  </defs>
+</svg>
+
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <svg class="logo ic"><use href="#i-logo"/></svg><span>kgraph</span>
+      <button id="btn-drawer" class="icon-btn" title="Hide / show the tools panel"><svg class="ic"><use href="#i-panel"/></svg></button>
+    </div>
+    <div class="nav-section">Manage</div>
+    <nav id="left-tabs" class="nav">
+      <button data-tab="repo" class="active"><svg class="ic"><use href="#i-repo"/></svg><span>Repository</span></button>
+      <button data-tab="ask"><svg class="ic"><use href="#i-ask"/></svg><span>Ask</span></button>
+      <button data-tab="queries"><svg class="ic"><use href="#i-query"/></svg><span>Queries</span></button>
+      <button data-tab="rules"><svg class="ic"><use href="#i-rules"/></svg><span>Business rules</span></button>
+      <button data-tab="filters"><svg class="ic"><use href="#i-filter"/></svg><span>Filters</span></button>
+      <button data-tab="docs"><svg class="ic"><use href="#i-doc"/></svg><span>Documentation</span></button>
+    </nav>
+    <div class="side-foot">
+      <div class="side-card" id="side-repo">
+        <div class="side-title">No repository</div>
+        <div class="side-sub">Open <b>Repository</b> to scan one.</div>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="left" class="drawer">
+    <section data-pane="repo" class="pane active">
+      <div class="lbl">Scan a repository</div>
+      <form id="scan-form" autocomplete="off">
+        <input id="source" placeholder="Git URL (https://…) or local path, e.g. samples/shop" required>
+        <input id="branch" placeholder="branch (optional)">
+        <label class="lbl" for="rules-engine">Business rules during the scan</label>
+        <select id="rules-engine" title="Business rules found during the scan itself">
+          <option value="heuristic">Built-in heuristics</option>
+          <option value="none">None (structure only)</option>
+        </select>
+        <label class="check llm" title="Sends the source code of service / controller / entity classes to Anthropic (Claude) to describe rules in business language and find extra ones. Check your client's data policy first."><input type="checkbox" id="use-llm"> Enrich rules with Claude</label>
+        <button id="scan-btn" type="submit" class="primary wide">Scan repository</button>
+      </form>
+      <p class="hint">Try the bundled example: <code>samples/shop</code> (Spring Boot Java + Kotlin, Angular, React, PostgreSQL).</p>
+    </section>
+
+    <section data-pane="ask" class="pane">
+      <label class="lbl">Ask in natural language (EN / FR)</label>
+      <textarea id="nlq" rows="3" placeholder="e.g. What is the impact if I change the table customers?"></textarea>
+      <button id="nlq-btn" class="primary">Ask</button>
+      <div class="lbl">Examples</div>
+      <ul id="examples" class="links"></ul>
+    </section>
+
+    <section data-pane="queries" class="pane">
+      <label class="lbl">Query</label>
+      <select id="q-name"></select>
+      <div id="q-fields"></div>
+      <button id="q-run" class="primary">Run</button>
+      <datalist id="dl-screens"></datalist><datalist id="dl-any"></datalist>
+      <datalist id="dl-tables"></datalist><datalist id="dl-caps"></datalist>
+    </section>
+
+    <section data-pane="rules" class="pane">
+      <div class="lbl">Business rules via the Claude Code <code>code-modernization</code> plugin</div>
+      <p class="hint">Replaces the rules of the graph by the plugin's rule cards (no heuristics). Starts <b>many Claude agents</b>
+        (~10-15 per module, minutes to hours) and sends the repository source code to Anthropic.</p>
+      <label class="lbl" for="module-pattern">Modules (recommended: start with one)</label>
+      <input id="module-pattern" placeholder="e.g. order   (empty = whole repository)">
+      <label class="check"><input type="checkbox" id="reuse-rules" disabled> reuse the last plugin result (no new run)</label>
+      <button id="analyze-btn2" class="primary" disabled>Analyze business rules</button>
+      <button id="cancel-btn" style="display:none">Cancel</button>
+      <p id="plugin-hint" class="hint" style="display:none">Plugin not detected. Install it once in a terminal:<br>
+        <code>claude plugin install code-modernization@claude-plugins-official</code></p>
+      <div id="progress" style="display:none">
+        <div class="lbl">Progress</div>
+        <div class="phase" id="p-phase"></div>
+        <div class="bar"><div id="p-bar" class="indeterminate"></div></div>
+        <div class="kpis">
+          <div><b id="p-elapsed">00:00</b><span>elapsed</span></div>
+          <div><b id="p-agents">0</b><span id="p-agents-l">agents</span></div>
+          <div><b id="p-tools">0</b><span>tool calls</span></div>
+          <div><b id="p-shards">–</b><span>modules</span></div>
+        </div>
+        <div class="hint" id="p-last"></div>
+        <div class="hint" id="p-files"></div>
+      </div>
+      <div class="lbl">Activity</div>
+      <pre id="activity" class="activity">idle</pre>
+    </section>
+
+    <section data-pane="filters" class="pane">
+      <label class="lbl">Search a node</label>
+      <input id="search" placeholder="name…">
+      <ul id="search-results" class="links"></ul>
+      <div class="lbl">Node types</div>
+      <div id="type-filters"></div>
+      <label class="check"><input type="checkbox" id="show-derived" checked> show exact (derived) links</label>
+    </section>
+
+    <section data-pane="docs" class="pane">
+      <button id="docs-gen" class="primary">Generate documentation</button>
+      <a id="docs-zip" class="btn" href="/api/docs.zip">Download .zip</a>
+      <div class="lbl">Neo4j</div>
+      <a id="neo4j-dl" class="btn" href="/api/neo4j.cypher" title="Cypher script: constraints, nodes (one label per ontology type) and relationships">Download Neo4j script (.cypher)</a>
+      <p class="hint">Load it with <code>cypher-shell -f graph.cypher</code>, or push to a local Neo4j: <code>python3 -m kgraph neo4j --graph graph.json --load</code>.</p>
+      <ul id="docs-list" class="links"></ul>
+    </section>
+  </aside>
+
+  <div id="workspace">
+    <header class="topbar">
+      <div class="page-title" id="page-title">Knowledge graph</div>
+      <div class="top-right">
+        <div class="search">
+          <svg class="ic"><use href="#i-query"/></svg>
+          <input id="top-search" placeholder="Search nodes" autocomplete="off">
+          <kbd>⌘ + K</kbd>
+          <div id="top-results"></div>
+        </div>
+        <div id="engine-chip" class="chip" title="Query engine">engine</div>
+        <div id="status" class="chip">no repository</div>
+        <button id="btn-activity" class="icon-btn bell" title="Activity of the business-rules analysis"><svg class="ic"><use href="#i-bell"/></svg><span id="bell-dot" hidden></span></button>
+        <div class="avatar" title="kgraph">KG</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <nav class="utabs">
+          <button id="tab-graph" class="tab active">Graph</button>
+          <button id="tab-network" class="tab">Network</button>
+          <button id="tab-rules" class="tab">Rules list <span id="rules-count" class="count">0</span></button>
+        </nav>
+        <button id="analyze-btn" type="button" class="primary" disabled title="Run the Claude Code code-modernization plugin to extract the business rules of the scanned repository">Analyze business rules</button>
+      </div>
+
+      <section id="kpis" class="kpi-row" style="display:none"></section>
+
+      <div class="main-row">
+        <section id="canvas" class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Knowledge graph</div>
+              <div class="card-sub" id="view-info">Scan a repository to build the graph</div>
+            </div>
+            <div class="seg">
+              <button id="btn-full" title="Show the whole graph">Whole graph</button>
+              <button id="btn-rules-graph" title="Show every business rule in the graph, with what enforces it and the screens it concerns">Rules in graph</button>
+              <button id="btn-result" title="Show only the last result">Last result</button>
+              <button id="btn-fit">Fit</button>
+              <button id="btn-panels" title="Hide / show side panels">Focus</button>
+            </div>
+          </div>
+          <div class="stage">
+            <svg id="graph" role="img" aria-label="Knowledge graph"></svg>
+            <div id="network" style="display:none">
+              <canvas id="net-canvas"></canvas>
+              <div id="net-info"></div>
+              <div id="net-panel">
+                <button id="net-toggle" title="Show / hide the controls">⚙</button>
+                <div class="net-body">
+                  <input id="net-search" placeholder="Search nodes…">
+                  <details open><summary>Filters</summary>
+                    <label><input type="checkbox" id="net-orphans" checked> Orphans (unlinked nodes)</label>
+                    <label><input type="checkbox" id="net-local"> Local graph around the selected node</label>
+                    <label>Depth <input type="range" id="net-depth" min="1" max="4" step="1" value="2"></label>
+                    <div id="net-legend"></div>
+                  </details>
+                  <details open><summary>Display</summary>
+                    <label><input type="checkbox" id="net-labels" checked> Labels</label>
+                    <label><input type="checkbox" id="net-arrows"> Arrows</label>
+                    <label>Text fade threshold <input type="range" id="net-fade" min="0" max="2" step="0.05" value="0.6"></label>
+                    <label>Node size <input type="range" id="net-size" min="0.5" max="3" step="0.1" value="1"></label>
+                    <label>Link thickness <input type="range" id="net-linkw" min="0.3" max="4" step="0.1" value="1"></label>
+                  </details>
+                  <details><summary>Forces</summary>
+                    <label>Center force <input type="range" id="net-center" min="0" max="0.3" step="0.005" value="0.05"></label>
+                    <label>Repel force <input type="range" id="net-repel" min="0" max="4" step="0.05" value="1"></label>
+                    <label>Link force <input type="range" id="net-link" min="0" max="1" step="0.02" value="0.5"></label>
+                    <label>Link distance <input type="range" id="net-dist" min="10" max="200" step="1" value="55"></label>
+                  </details>
+                  <div class="net-actions"><button id="net-restart">Animate</button><button id="net-freeze">Freeze</button><button id="net-fit">Fit</button></div>
+                  <div class="net-help">Drag a node · scroll to zoom · drag the background to pan · double-click a node for its local graph</div>
+                </div>
+              </div>
+            </div>
+            <div id="rulelist" style="display:none">
+              <div class="rl-filters">
+                <input id="rl-search" placeholder="Search rules (text, class, method, table…)">
+                <select id="rl-kind"><option value="">All kinds</option></select>
+                <select id="rl-prio"><option value="">All priorities</option><option>P0</option><option>P1</option><option>P2</option></select>
+                <label class="check"><input type="checkbox" id="rl-defect"> suspected defects only</label>
+                <label class="check"><input type="checkbox" id="rl-sme"> needs SME review only</label>
+                <span id="rl-count" class="muted"></span>
+                <button id="rl-graph" class="primary">Show these rules in the graph</button>
+              </div>
+              <div class="rl-scroll"><table id="rl-table"></table></div>
+            </div>
+            <div id="empty">Open <b>Repository</b> in the sidebar and click <b>Scan repository</b>.<br>
+              <small>Try the bundled example: <code>samples/shop</code></small></div>
+          </div>
+        </section>
+
+        <aside id="right" class="card">
+          <nav class="tabs" id="right-tabs">
+            <button data-tab="result" class="active">Result</button>
+            <button data-tab="node">Node</button>
+          </nav>
+          <section data-pane="result" class="pane active"><div id="result" class="md"><p class="muted">Run a query or ask a question.</p></div></section>
+          <section data-pane="node" class="pane"><div id="node" class="md"><p class="muted">Click a node in the graph.</p></div></section>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/network.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

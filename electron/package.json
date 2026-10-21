@@ -1,0 +1,30 @@
+{
+  "name": "kgraph-desktop",
+  "productName": "kgraph",
+  "version": "1.0.0",
+  "description": "Desktop shell for the kgraph knowledge-graph explorer (starts the local Python server and shows the UI)",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.kgraph.desktop",
+    "productName": "kgraph",
+    "files": ["main.js", "preload.js", "launcher.js", "package.json"],
+    "extraResources": [
+      { "from": "../kgraph", "to": "kgraph", "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
+      { "from": "../samples", "to": "samples", "filter": ["**/*"] }
+    ],
+    "mac": { "category": "public.app-category.developer-tools", "target": ["dmg", "zip"] },
+    "win": { "target": ["nsis"] },
+    "linux": { "target": ["AppImage"], "category": "Development" }
+  }
+}

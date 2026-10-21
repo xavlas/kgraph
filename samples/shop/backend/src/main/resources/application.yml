@@ -1,0 +1,6 @@
+server:
+  servlet:
+    context-path: /api
+app:
+  topics:
+    order-created: orders.created
