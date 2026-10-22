@@ -754,7 +754,6 @@ async function boot() {
   $("#btn-rules-graph").addEventListener("click", () => showRulesInGraph());
   $("#rl-graph").addEventListener("click", () => showRulesInGraph(null, filteredRules().map(r => r.n)));
   for (const id of ["#rl-search", "#rl-kind", "#rl-prio", "#rl-defect", "#rl-sme"]) $(id).addEventListener(id === "#rl-search" ? "input" : "change", renderRuleList);
-  $("#btn-panels").addEventListener("click", () => { document.body.classList.toggle("focus"); setTimeout(() => fitView(), 50); });
   $("#btn-full").addEventListener("click", () => { view = { mode: "full", ids: null, edges: null, focus: null }; refresh(true); });
   $("#btn-result").addEventListener("click", () => { if (lastResult?.graph?.nodes?.length) showResult(lastResult); });
   $("#show-derived").addEventListener("change", () => refresh());
@@ -764,7 +763,7 @@ async function boot() {
   $("#scan-form").addEventListener("submit", async e => {
     e.preventDefault();
     try {
-      const engine = $("#rules-engine").value, useLlm = $("#use-llm").checked && engine === "heuristic";
+      const engine = "heuristic", useLlm = $("#use-llm").checked;
       if (useLlm && !confirm("Claude enrichment sends the source code of the business classes (services, controllers, entities) to Anthropic.\n\nContinue only if your client / project data policy allows it.")) return;
       await api("/api/scan", { source: $("#source").value, branch: $("#branch").value, llm: useLlm, rules_engine: engine });
       const s = await pollStatus();

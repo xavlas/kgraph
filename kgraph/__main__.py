@@ -81,6 +81,12 @@ def main(argv=None):
     sp.add_argument("--llm", nargs="?", const="auto", choices=["auto", "cli", "api"], help="enrich rules with Claude for the startup scan")
     _rules_args(sp)
 
+    sp = sub.add_parser("mcp", help="MCP server (stdio) exposing the graph to AI clients (read-only)")
+    sp.add_argument("--graph", help="graph.json to serve (default: <workdir>/last-graph.json, i.e. the last scan of the UI/CLI)")
+    sp.add_argument("--workdir", default=".kgraph")
+    sp.add_argument("--engine", choices=["memory", "neo4j"], default="memory",
+                    help="answer from memory (default) or from Neo4j (NEO4J_PASSWORD / NEO4J_URI in the environment)")
+
     for name in ("query", "ask", "docs", "neo4j"):
         sp = sub.add_parser(name)
         sp.add_argument("--graph", help="graph.json produced by `scan`")
@@ -135,6 +141,9 @@ def main(argv=None):
             if args.scan and args.rules == "modernization":
                 _confirm_modernization(args)
             serve(args.host, args.port, args.workdir, args.scan, args.llm, args.rules, args.modernization_pattern)
+        elif args.cmd == "mcp":
+            from .mcp import serve_stdio
+            serve_stdio(args.graph, args.workdir, args.engine)
         elif args.cmd == "query":
             eng = _engine(args, _load(args))
             a = args.args

@@ -32,9 +32,7 @@
       <button data-tab="repo" class="active"><svg class="ic"><use href="#i-repo"/></svg><span>Repository</span></button>
       <button data-tab="ask"><svg class="ic"><use href="#i-ask"/></svg><span>Ask</span></button>
       <button data-tab="queries"><svg class="ic"><use href="#i-query"/></svg><span>Queries</span></button>
-      <button data-tab="rules"><svg class="ic"><use href="#i-rules"/></svg><span>Business rules</span></button>
       <button data-tab="filters"><svg class="ic"><use href="#i-filter"/></svg><span>Filters</span></button>
-      <button data-tab="docs"><svg class="ic"><use href="#i-doc"/></svg><span>Documentation</span></button>
     </nav>
     <div class="side-foot">
       <div class="side-card" id="side-repo">
@@ -50,11 +48,6 @@
       <form id="scan-form" autocomplete="off">
         <input id="source" placeholder="Git URL (https://…) or local path, e.g. samples/shop" required>
         <input id="branch" placeholder="branch (optional)">
-        <label class="lbl" for="rules-engine">Business rules during the scan</label>
-        <select id="rules-engine" title="Business rules found during the scan itself">
-          <option value="heuristic">Built-in heuristics</option>
-          <option value="none">None (structure only)</option>
-        </select>
         <label class="check llm" title="Sends the source code of service / controller / entity classes to Anthropic (Claude) to describe rules in business language and find extra ones. Check your client's data policy first."><input type="checkbox" id="use-llm"> Enrich rules with Claude</label>
         <button id="scan-btn" type="submit" class="primary wide">Scan repository</button>
       </form>
@@ -138,7 +131,7 @@
         <div id="engine-chip" class="chip" title="Query engine">engine</div>
         <div id="status" class="chip">no repository</div>
         <button id="btn-activity" class="icon-btn bell" title="Activity of the business-rules analysis"><svg class="ic"><use href="#i-bell"/></svg><span id="bell-dot" hidden></span></button>
-        <div class="avatar" title="kgraph">KG</div>
+        <div class="avatar" title="XL">XL</div>
       </div>
     </header>
 
@@ -166,7 +159,6 @@
               <button id="btn-rules-graph" title="Show every business rule in the graph, with what enforces it and the screens it concerns">Rules in graph</button>
               <button id="btn-result" title="Show only the last result">Last result</button>
               <button id="btn-fit">Fit</button>
-              <button id="btn-panels" title="Hide / show side panels">Focus</button>
             </div>
           </div>
           <div class="stage">

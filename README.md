@@ -266,6 +266,21 @@ blanches (types, relations) et des entiers bornés ; le mot de passe n'est lu qu
 * L'affichage du graphe entier dans l'interface et la reconnaissance des noms en langage naturel utilisent encore le résultat du scan (en mémoire) ; Neo4j exécute les requêtes.
 * Plusieurs dépôts peuvent coexister dans une base (`kg_repo` = nom du dossier) ; deux dossiers de même nom se remplaceraient.
 
+## Serveur MCP (consommer le graphe depuis un assistant IA)
+
+`python3 -m kgraph mcp` démarre un serveur [MCP](https://modelcontextprotocol.io) en **stdio**, **lecture seule** : il ne scanne rien, n'écrit rien et n'envoie rien à l'extérieur. Il sert le dernier graphe scanné (`.kgraph/last-graph.json`, relu automatiquement quand il change) ou un fichier précis (`--graph graph.json`). `--engine neo4j` répond depuis Neo4j (`NEO4J_PASSWORD` dans l'environnement).
+
+Outils : `graph_overview`, `ontology_schema`, `search_nodes`, `explain_screen`, `show_call_chain`, `find_business_rules`, `determine_impact`, `show_capability`, `find_data_lineage`, `explore_ontology`, `ask` (langage naturel EN/FR). Chaque réponse contient un résumé lisible et le détail JSON (`structuredContent`).
+
+Déclaration dans un client (Claude Code : `.mcp.json` ou `claude mcp add`) :
+
+```json
+{ "mcpServers": { "kgraph": {
+    "command": "python3",
+    "args": ["-m", "kgraph", "mcp", "--graph", "/chemin/vers/graph.json"],
+    "cwd": "/chemin/vers/code-knowledge-graph" } } }
+```
+
 ## Application de bureau (Electron)
 
 ```bash
